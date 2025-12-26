@@ -57,3 +57,7 @@ This project exists because of your time, effort, and curiosity.
 - **About:** First-year student at IIIT Allahabad, interested in software engineering and open-source contributions.
 
 
+- **Name:** Sourish Awasthi
+- **GitHub:** https://github.com/LooninS
+- **About:** First year at IIIT, Allahbad in IT. I want to learn cool tech/software and work on cool stuff.
+
