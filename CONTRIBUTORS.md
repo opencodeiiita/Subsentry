@@ -61,4 +61,9 @@ This project exists because of your time, effort, and curiosity.
 - **GitHub:** https://github.com/thenix09
 - **About:** First-year student at IIIT Allahabad, interested in software engineering and open-source contributions.
 
+- **Name:** Krishna Sikheriya
+  **GitHub:** https://github.com/Krishna200608
+  **About:** I’m Krishna Sikheriya, a 3rd-year undergraduate at IIIT Allahabad (IIITA) with a strong interest in software engineering and open-source development.
+
+
 
