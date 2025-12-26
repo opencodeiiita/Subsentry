@@ -16,5 +16,9 @@ This project exists because of your time, effort, and curiosity.
 
 > Please add your details **at the end of the list** and follow the same format.
 
+- **Name:** Aman Sharma 
+- **GitHub:** https://github.com/amansharma264  
+- **About:** Full Stack Developer & DSA problem Solving 
+
 ---
 
