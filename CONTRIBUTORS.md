@@ -62,7 +62,7 @@ This project exists because of your time, effort, and curiosity.
 - **About:** First-year student at IIIT Allahabad, interested in software engineering and open-source contributions.
 
 - **Name:** Krishna Sikheriya
-  **GitHub:** https://github.com/your-username
+  **GitHub:** https://github.com/Krishna200608
   **About:** Third year student at IIIT Allahabad, eager to learn software engineering and open-source contributions.
 
 
