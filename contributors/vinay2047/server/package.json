@@ -3,19 +3,34 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+<<<<<<< HEAD
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
+=======
+  "scripts": {
+>>>>>>> f220151 (added clerk auth and nextjs)
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "mongoose": "^9.0.2",
+=======
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.2"
+  },
+  "devDependencies": {
+>>>>>>> f220151 (added clerk auth and nextjs)
     "nodemon": "^3.1.11"
   }
 }
