@@ -1,61 +1,101 @@
-# Pull Request
+# Issue: #<issue-number>
 
-Thank you for contributing to **SubSentry** 🚀
+> ⚠️ This PR must be linked to a valid OpenCode issue number.
+> PRs without an issue number may not be reviewed.
 
-Please fill out this template to help maintainers review your PR efficiently.
+---
+
+Thank you for contributing to **SubSentry** 🚀  
+Please complete this template carefully to help mentors and bots review your PR efficiently.
 
 ---
 
 ## 📌 Description
 
-Provide a brief summary of what this PR does.
+Briefly explain **what you implemented** in this PR.
+- What problem does it solve?
+- What part of the project does it affect?
 
 ---
 
-## 🔗 Issue Linked
+## 🧩 Issue Reference
 
-Closes #<issue-number>
+**Related Issue:** #<issue-number>
 
-> Note: PRs without a linked issue may be closed.
-
----
-
-## 🧪 What Was Tested?
-
-Describe how you tested your changes:
-
-- [ ] Frontend manually tested
-- [ ] Backend APIs tested
-- [ ] Edge cases considered
+> Note: Do NOT use words like `Closes`, `Fixes`, or `Resolves`.
+> Issues are **Open for All** and should not be auto-closed.
 
 ---
 
-## 📷 Screenshots / Demo (if applicable)
+## 🛠️ What Did You Implement?
 
-Attach screenshots or a short screen recording for UI changes.
+Please list the **major things you worked on** in this PR:
+
+- [ ] Feature implementation
+- [ ] UI changes
+- [ ] API / backend logic
+- [ ] Refactor / cleanup
+- [ ] Documentation update
+- [ ] Demo / setup task
+
+(Select all that apply)
 
 ---
 
-## ✅ Pull Request Checklist
+## 📁 Workspace Confirmation (MANDATORY)
 
-Please ensure all of the following are checked:
+Since all issues are **Open for All**, confirm the following:
 
-- [ ] I am assigned to this issue
-- [ ] This PR addresses **only one issue**
-- [ ] Code builds and runs locally without errors
+- [ ] All changes are inside  
+  `contributors/<your-github-username>/`
+- [ ] Base `client/` and/or `server/` files were **copied from the main directory**
+- [ ] No files outside my personal workspace were modified
+
+---
+
+## 🧪 Testing Performed
+
+Please check what applies:
+
+- [ ] Frontend runs locally without errors
+- [ ] Backend server runs locally without errors
+- [ ] APIs tested with valid inputs
+- [ ] APIs tested with invalid / edge-case inputs
 - [ ] No console errors or warnings
-- [ ] UI changes include screenshots / recordings
-- [ ] API changes are tested with valid and invalid inputs
-- [ ] Commit messages follow project conventions
+
+---
+
+## 📷 Screenshots / Demo (REQUIRED for most PRs)
+
+Please attach **screenshots or recordings** showing:
+- Folder structure
+- Major code changes
+- UI changes (if applicable)
+- Server / client running (for setup or demo issues)
+
+PRs without screenshots for significant changes **may be requested for updates**.
+
+---
+
+## ✅ Final PR Checklist
+
+Before submitting, ensure:
+
+- [ ] This PR addresses **only one issue**
+- [ ] Issue number is mentioned at the top
+- [ ] Code is readable and well-structured
+- [ ] No unnecessary files are included
 - [ ] No sensitive data or `.env` files committed
-- [ ] PR title and description are clear
+- [ ] Commit messages follow project conventions
+- [ ] PR title is clear and descriptive
 
 ---
 
-## 📎 Additional Notes
+## 📎 Additional Notes for Reviewers
 
-Add any extra context or notes for reviewers here.
+Add any extra context, assumptions, or known limitations here.
 
 ---
 
-Thank you for contributing to **SubSentry** 💙
+Thank you for contributing to **SubSentry** 💙  
+Your effort helps make this project better for everyone 🚀
