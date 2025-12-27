@@ -123,3 +123,6 @@ This project exists because of your time, effort, and curiosity.
 - **GitHub:** https://github.com/Atharva-insane
 - **About:** Science enthusiast
 
+- **Name:** Yuvaraj Ragothaman
+- **GitHub:** https://github.com/LevelSilence
+- **About:** Sophomore @IIITA
