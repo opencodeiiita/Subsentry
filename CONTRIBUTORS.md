@@ -20,6 +20,11 @@ This project exists because of your time, effort, and curiosity.
 
 ## My Details
 
+- **Name:** Aman sharma
+- **GitHub:** https://github.com/amansharma264
+- **About:** I am Aman Sharma, a third-year Electronics and Telecommunication Engineering student at Sir M. Visvesvaraya Institute of Technology, Bangalore. I am a backend developer with a strong interest in Data Structures and Algorithms. 
+
+
 - **Name:** Vansh Kumar Patel
 - **GitHub:** https://github.com/vansh216
 - **About:** I am Vansh Kumar Patel, a second-year Information Technology student at KNIT Sultanpur. I am an aspiring MERN Stack Developer with a strong interest in building modern, user-friendly web applications. I am continuously improving my skills in MongoDB, Express.js, React.js, and Node.js and enjoy learning new technologies and working on real-world projects.
