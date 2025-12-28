@@ -126,6 +126,10 @@ This project exists because of your time, effort, and curiosity.
 - **GitHub:** https://github.com/amansharma264
 - **About:** Third-year B.Tech student in ETE. Passionate about Backend development.
 
+- **Name:** Sanchita Anil Agte
+  **GitHub:** https://github.com/san-dae 
+  **About:** chronically online, new to WebD
+
 - **Name:** Kamakshi Gupta  
 - **GitHub:** https://github.com/kamakshi-gupta  
 - **About:** IT Sophomore at IIIT Allahabad, exploring open source and learn along the way.
@@ -134,4 +138,7 @@ This project exists because of your time, effort, and curiosity.
 - **GitHub:** https://github.com/KaranMagham 
 - **About:** I am a backend developer with experience in Node.js, MongoDB, and building scalable APIs. I enjoy contributing to open-source projects and learning industry-standard practices.
 
+- **Name:** Krish Sushil Kinger
+  **GitHub:** https://github.com/KRISHH-33
+  **About:** Mera naam Krish hai aur mujhe Coffee peena bohot pasand hai.
 
