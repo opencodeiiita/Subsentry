@@ -129,3 +129,9 @@ This project exists because of your time, effort, and curiosity.
 - **Name:** Kamakshi Gupta  
 - **GitHub:** https://github.com/kamakshi-gupta  
 - **About:** IT Sophomore at IIIT Allahabad, exploring open source and learn along the way.
+
+- **Name:** Karan Magham  
+- **GitHub:** https://github.com/KaranMagham 
+- **About:** I am a backend developer with experience in Node.js, MongoDB, and building scalable APIs. I enjoy contributing to open-source projects and learning industry-standard practices.
+
+
