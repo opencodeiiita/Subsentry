@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const SubscriptionSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
       index: true,
     },
 
@@ -105,4 +105,6 @@ SubscriptionSchema.index(
   { sparse: true }
 );
 
-export default mongoose.model("Subscription", SubscriptionSchema);
+module.exports =
+  mongoose.models.Subscription ||
+  mongoose.model("Subscription", SubscriptionSchema);
