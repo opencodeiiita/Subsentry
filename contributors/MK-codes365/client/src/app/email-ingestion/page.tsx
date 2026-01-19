@@ -2,9 +2,19 @@
 
 import { useState } from "react";
 
+interface Subscription {
+  service: string;
+  billingHint: string;
+  amount: string | null;
+  date: string;
+  originalSubject: string;
+}
+
 interface ScanResult {
   found: number;
-  subscriptions: string[];
+  saved: number;
+  skipped: number;
+  subscriptions: Subscription[];
 }
 
 export default function EmailIngestionPage() {
@@ -92,14 +102,44 @@ export default function EmailIngestionPage() {
                   </h3>
                   <p className="text-sm text-green-800 mt-1">
                     Found {result.found} subscription
-                    {result.found !== 1 ? "s" : ""}
+                    {result.found !== 1 ? "s" : ""}.
+                  </p>
+                  <p className="text-xs text-green-700 mt-1">
+                    <span className="font-semibold">{result.saved}</span> saved
+                    to your dashboard,{" "}
+                    <span className="font-semibold">{result.skipped}</span>{" "}
+                    duplicates skipped.
                   </p>
                   {result.subscriptions.length > 0 && (
-                    <ul className="mt-2 text-sm text-green-700 space-y-1">
+                    <div className="mt-4 space-y-3">
                       {result.subscriptions.map((sub, index) => (
-                        <li key={index}>• {sub}</li>
+                        <div
+                          key={index}
+                          className="bg-white border border-green-100 rounded-md p-3 flex justify-between items-center shadow-sm"
+                        >
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              {sub.service}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {sub.billingHint} •{" "}
+                              {new Date(sub.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            {sub.amount ? (
+                              <span className="font-bold text-gray-900">
+                                {sub.amount}
+                              </span>
+                            ) : (
+                              <span className="text-xs italic text-gray-400">
+                                Amount not found
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </div>
               </div>
