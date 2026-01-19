@@ -87,6 +87,15 @@ export default async function Dashboard() {
 
       <SummaryWidgets stats={stats} />
 
+      <div className="mb-6">
+        <a
+          href="/email-ingestion"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          📧 Scan Emails for Subscriptions
+        </a>
+      </div>
+
       <UpcomingRenewals subscriptions={subscriptions} />
 
       <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">

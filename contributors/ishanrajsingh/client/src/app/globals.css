@@ -83,50 +83,6 @@ body {
   animation: gradientShift 3s ease infinite;
 }
 
-/* Float animation for decorative elements */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Delay utilities for staggered animations */
-.delay-1000 {
-  animation-delay: 1000ms;
-}
-
-.delay-500 {
-  animation-delay: 500ms;
-}
-
-.delay-2000 {
-  animation-delay: 2000ms;
-}
-
-/* Auth layout container styling for Clerk components */
-.auth-container .cl-rootBox {
-  width: 100%;
-}
-
-.auth-container .cl-card {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(229, 231, 235, 1);
-  border-radius: 1rem;
-}
-
-/* Override any conflicting Clerk default styles */
-.auth-container .cl-internal-b3fm6y {
-  background: white !important;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

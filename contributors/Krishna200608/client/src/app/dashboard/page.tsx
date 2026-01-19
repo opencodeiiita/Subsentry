@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import SummaryWidgets from './SummaryWidgets';
-import UpcomingRenewals from './UpcomingRenewals';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout';
@@ -155,6 +153,42 @@ export default function Dashboard() {
     s.isTrial && s.trialEndsAt && getDaysUntilRenewal(s.trialEndsAt) <= 7
   );
 
+  const summaryCards = [
+    {
+      label: 'Monthly Spend',
+      value: formatCurrency(monthlyTotal),
+      hint: `${formatCurrency(monthlyTotal * 12)}/year`,
+      icon: DollarSign,
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-400',
+    },
+    {
+      label: 'Active Subscriptions',
+      value: activeSubscriptions.length.toString(),
+      hint: `${subscriptions.length} total`,
+      icon: CreditCard,
+      iconBg: 'bg-emerald-500/20',
+      iconColor: 'text-emerald-400',
+    },
+    {
+      label: 'Upcoming Renewals',
+      value: urgentRenewals.length.toString(),
+      hint: 'Next 3 days',
+      icon: AlertTriangle,
+      iconBg: urgentRenewals.length > 0 ? 'bg-amber-500/20' : 'bg-gray-500/20',
+      iconColor: urgentRenewals.length > 0 ? 'text-amber-400' : 'text-gray-400',
+      highlight: urgentRenewals.length > 0,
+    },
+    {
+      label: 'Trials Ending',
+      value: trialsEnding.length.toString(),
+      hint: 'Within 7 days',
+      icon: Clock,
+      iconBg: trialsEnding.length > 0 ? 'bg-purple-500/20' : 'bg-gray-500/20',
+      iconColor: trialsEnding.length > 0 ? 'text-purple-400' : 'text-gray-400',
+      highlight: trialsEnding.length > 0,
+    },
+  ];
 
   // Get recent subscriptions sorted by renewal date
   const recentSubscriptions = [...subscriptions]
@@ -200,12 +234,36 @@ export default function Dashboard() {
         </div>
       </div>
 
-
-      {/* Dashboard Summary Widgets */}
-      <SummaryWidgets />
-
-      {/* Upcoming Renewals Section */}
-      <UpcomingRenewals subscriptions={subscriptions} />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div 
+              key={card.label} 
+              className={cn(
+                "p-5 rounded-xl border transition-all duration-200 hover:border-[#2a2a2a]",
+                card.highlight 
+                  ? "bg-gradient-to-br from-[#0f0f0f] to-[#0a0a0a] border-amber-500/30" 
+                  : "bg-[#0f0f0f] border-[#1a1a1a]"
+              )}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {card.label}
+                </span>
+                <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", card.iconBg)}>
+                  <Icon className={cn("w-4 h-4", card.iconColor)} />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white">{card.value}</div>
+              <div className={cn("text-xs mt-1", card.highlight ? card.iconColor : "text-gray-500")}>
+                {card.hint}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,6 +1,4 @@
 const Subscription = require("../models/subscription");
-const { calculateMonthlySpend } = require("../services/subscriptionMetrics");
-const { calculateYearlySpend } = require("../services/subscriptionMetrics");
 ///////////-1)--create subscription---///////////
 
 const createSubscription = async (req, res) => {
@@ -58,18 +56,11 @@ const getSubscriptions = async (req, res) => {
   try {
     const subscriptions = await Subscription.find({}).sort({ createdAt: -1 });
 
-    const monthlySpend = calculateMonthlySpend(subscriptions);
-    const yearlySpend = calculateYearlySpend(subscriptions);
-
     res.status(200).json({
       success: true,
       message: "Subscriptions retrieved successfully",
       data: subscriptions,
       count: subscriptions.length,
-      meta: {
-        monthlySpend,
-        yearlySpend,
-      },
     });
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
@@ -117,7 +108,7 @@ const updateSubscription = async (req, res) => {
         category,
         notes: notes || "",
       },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true }
     );
 
     if (!subscription) {

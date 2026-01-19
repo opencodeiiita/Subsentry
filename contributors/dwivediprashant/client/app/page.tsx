@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import AppLayout from './components/AppLayout';
-import DeleteConfirmationDialog from './components/DeleteConfirmationDialog';
-import EditSubscriptionForm from './components/EditSubscriptionForm';
-import Modal from './components/Modal';
-import SubscriptionForm from './components/SubscriptionForm';
-import { SubscriptionData } from './subscriptions/page';
+import { useState, useEffect } from "react";
+import AppLayout from "./components/AppLayout";
+import { SubscriptionData } from "./subscriptions/page";
+import Modal from "./components/Modal";
+import SubscriptionForm from "./components/SubscriptionForm";
+import EditSubscriptionForm from "./components/EditSubscriptionForm";
+import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 
 export default function Dashboard() {
   const [subscriptionList, setSubscriptionList] = useState<SubscriptionData[]>(
@@ -29,11 +29,11 @@ export default function Dashboard() {
   const fetchSubscriptionData = async () => {
     try {
       setLoadingState(true);
-      const response = await fetch('/api/subscriptions');
+      const response = await fetch("/api/subscriptions");
       const data = await response.json();
       setSubscriptionList(data);
     } catch (error) {
-      console.error('Failed to fetch subscriptions:', error);
+      console.error("Failed to fetch subscriptions:", error);
     } finally {
       setLoadingState(false);
     }
@@ -41,40 +41,31 @@ export default function Dashboard() {
 
   const calculateStats = () => {
     const activeSubscriptions = subscriptionList.filter(
-      (sub) => sub.serviceStatus === 'active'
+      (sub) => sub.serviceStatus === "active"
     );
     const trialSubscriptions = subscriptionList.filter(
-      (sub) => sub.serviceStatus === 'trial'
+      (sub) => sub.serviceStatus === "trial"
     );
     const monthlySubscriptions = activeSubscriptions.filter(
-      (sub) => sub.billingInterval === 'monthly'
+      (sub) => sub.billingInterval === "monthly"
     );
     const monthlyTotal = monthlySubscriptions.reduce(
       (sum, sub) => sum + sub.cost,
       0
     );
 
-    const spendTotals = activeSubscriptions.reduce(
-      (totals, sub) => {
-        if (sub.billingInterval === 'monthly') {
-          totals.monthlySpend += sub.cost;
-          totals.yearlySpend += sub.cost * 12;
-        } else if (sub.billingInterval === 'yearly') {
-          totals.yearlySpend += sub.cost;
-        } else if (sub.billingInterval === 'weekly') {
-          totals.monthlySpend += sub.cost * 4;
-          totals.yearlySpend += sub.cost * 52;
-        }
-
-        return totals;
-      },
-      { monthlySpend: 0, yearlySpend: 0 }
-    );
+    const today = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+    const upcomingRenewals = subscriptionList.filter((sub) => {
+      const renewalDate = new Date(sub.upcomingRenewal);
+      return renewalDate >= today && renewalDate <= sevenDaysFromNow;
+    });
 
     return {
-      monthlySpend: spendTotals.monthlySpend,
-      yearlySpend: spendTotals.yearlySpend,
+      monthlySpend: monthlyTotal,
       activeCount: activeSubscriptions.length,
+      upcomingRenewalsCount: upcomingRenewals.length,
       trialCount: trialSubscriptions.length,
     };
   };
@@ -112,12 +103,12 @@ export default function Dashboard() {
       const response = await fetch(
         `/api/subscriptions/${deletingSubscription._id}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to delete subscription');
+        throw new Error("Failed to delete subscription");
       }
 
       setIsDeleteDialogOpen(false);
@@ -130,7 +121,7 @@ export default function Dashboard() {
         setDeleteSuccess(false);
       }, 2000);
     } catch (error) {
-      console.error('Error deleting subscription:', error);
+      console.error("Error deleting subscription:", error);
     }
   };
 
@@ -140,65 +131,6 @@ export default function Dashboard() {
   };
 
   const stats = calculateStats();
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 2,
-    }).format(value);
-
-  const formatDate = (dateString: string) =>
-    new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(new Date(dateString));
-
-  const getDaysUntil = (dateString: string) => {
-    const today = new Date();
-    const startOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const targetDate = new Date(dateString);
-    const startOfTarget = new Date(
-      targetDate.getFullYear(),
-      targetDate.getMonth(),
-      targetDate.getDate()
-    );
-    const diffMs = startOfTarget.getTime() - startOfToday.getTime();
-    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  };
-
-  const upcomingRenewals = subscriptionList
-    .filter((subscription) => Boolean(subscription.upcomingRenewal))
-    .map((subscription) => ({
-      ...subscription,
-      daysUntil: getDaysUntil(subscription.upcomingRenewal),
-    }))
-    .filter(
-      (subscription) =>
-        subscription.daysUntil >= 1 && subscription.daysUntil <= 20
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.upcomingRenewal).getTime() -
-        new Date(b.upcomingRenewal).getTime()
-    );
-
-  const todayRenewals = subscriptionList
-    .filter((subscription) => Boolean(subscription.upcomingRenewal))
-    .map((subscription) => ({
-      ...subscription,
-      daysUntil: getDaysUntil(subscription.upcomingRenewal),
-    }))
-    .filter((subscription) => subscription.daysUntil === 0)
-    .sort(
-      (a, b) =>
-        new Date(a.upcomingRenewal).getTime() -
-        new Date(b.upcomingRenewal).getTime()
-    );
 
   return (
     <AppLayout activePage="Dashboard">
@@ -223,18 +155,16 @@ export default function Dashboard() {
       )}
 
       {/* Header Section */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#FFFFFF] mb-2">
-            Dashboard
-          </h1>
-          <p className="text-[#B3B3B3] text-sm sm:text-base">
+          <h1 className="text-3xl font-bold text-[#FFFFFF] mb-2">Dashboard</h1>
+          <p className="text-[#B3B3B3]">
             Welcome back! Here's an overview of your subscriptions.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="w-full sm:w-auto px-6 py-3 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors flex items-center justify-center"
+          className="px-6 py-3 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors flex items-center"
         >
           <svg
             className="w-5 h-5 mr-2"
@@ -254,176 +184,68 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
-        <div className="bg-[#191919] p-4 sm:p-6 rounded-xl border border-[#3B82F6]/40 shadow-[0_0_0_1px_rgba(59,130,246,0.2)] min-h-[128px] sm:min-h-[140px] flex flex-col justify-between overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-[#191919] p-6 rounded-xl border border-[#2A2A2A]/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#FFFFFF] text-sm font-medium">
               Monthly Spend
             </span>
+            <div className="w-8 h-8 bg-[#282828] rounded-lg flex items-center justify-center">
+              <span className="text-[#0000FF] text-sm">💰</span>
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0000FF] leading-tight break-words">
-            {formatCurrency(stats.monthlySpend)}
+          <div className="text-4xl font-bold text-[#0000FF]">
+            ${stats.monthlySpend.toFixed(2)}
           </div>
           <div className="text-xs text-[#B3B3B3] mt-1">
             From {stats.activeCount} active subscriptions
           </div>
         </div>
 
-        <div className="bg-[#191919] p-4 sm:p-6 rounded-xl border border-[#2A2A2A]/50 min-h-[128px] sm:min-h-[140px] flex flex-col justify-between overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#FFFFFF] text-sm font-medium">
-              Yearly Spend
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#60A5FA] leading-tight break-words">
-            {formatCurrency(stats.yearlySpend)}
-          </div>
-          <div className="text-xs text-[#B3B3B3] mt-1">Annualized total</div>
-        </div>
-
-        <div className="bg-[#191919] p-4 sm:p-6 rounded-xl border border-[#2A2A2A]/50 min-h-[128px] sm:min-h-[140px] flex flex-col justify-between overflow-hidden">
+        <div className="bg-[#191919] p-6 rounded-xl border border-[#2A2A2A]/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#FFFFFF] text-sm font-medium">
               Active Subscriptions
             </span>
+            <div className="w-8 h-8 bg-[#282828] rounded-lg flex items-center justify-center">
+              <span className="text-[#10B981] text-sm">✓</span>
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#009200] leading-tight break-words">
+          <div className="text-4xl font-bold text-[#009200]">
             {stats.activeCount}
           </div>
           <div className="text-xs text-[#B3B3B3] mt-1">All active</div>
         </div>
 
-        <div className="bg-[#191919] p-4 sm:p-6 rounded-xl border border-[#2A2A2A]/50 min-h-[128px] sm:min-h-[140px] flex flex-col justify-between overflow-hidden">
+        <div className="bg-[#191919] p-6 rounded-xl border border-[#2A2A2A]/50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[#FFFFFF] text-sm font-medium">
+              Upcoming Renewals
+            </span>
+            <div className="w-8 h-8 bg-[#282828] rounded-lg flex items-center justify-center">
+              <span className="text-[#F59E0B] text-sm">📅</span>
+            </div>
+          </div>
+          <div className="text-4xl font-bold text-[#F59E0B]">
+            {stats.upcomingRenewalsCount}
+          </div>
+          <div className="text-xs text-[#B3B3B3] mt-1">Next 7 days</div>
+        </div>
+
+        <div className="bg-[#191919] p-6 rounded-xl border border-[#2A2A2A]/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#FFFFFF] text-sm font-medium">
               Free Trials
             </span>
+            <div className="w-8 h-8 bg-[#282828] rounded-lg flex items-center justify-center">
+              <span className="text-[#737373] text-sm">⏱</span>
+            </div>
           </div>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#FF0000] leading-tight break-words">
+          <div className="text-4xl font-bold text-[#FF0000]">
             {stats.trialCount}
           </div>
           <div className="text-xs text-[#B3B3B3] mt-1">Active trials</div>
         </div>
-      </div>
-
-      {/* Today Renewals */}
-      <div className="mb-10">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-[#FFFFFF]">
-              Renewing Today
-            </h2>
-            <p className="text-sm text-[#B3B3B3]">Due today</p>
-          </div>
-          <span className="text-xs text-[#B3B3B3]">
-            {todayRenewals.length} today
-          </span>
-        </div>
-
-        {todayRenewals.length === 0 ? (
-          <div className="bg-[#191919] border border-[#2A2A2A]/50 rounded-xl p-6 text-sm text-[#B3B3B3]">
-            No renewals due today.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {todayRenewals.map((subscription) => (
-              <div
-                key={subscription._id}
-                className="rounded-xl border border-[#EF4444]/60 shadow-[0_0_0_1px_rgba(239,68,68,0.2)] p-5 bg-[#191919]"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-[#FFFFFF]">
-                      {subscription.serviceName}
-                    </p>
-                    <p className="text-xs text-[#B3B3B3]">
-                      {subscription.serviceCategory}
-                    </p>
-                  </div>
-                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#EF4444]/15 text-[#FCA5A5]">
-                    Renews today
-                  </span>
-                </div>
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-[#B3B3B3]">
-                    {formatDate(subscription.upcomingRenewal)}
-                  </span>
-                  <span className="text-[#FFFFFF] font-medium">
-                    {formatCurrency(subscription.cost)} /{' '}
-                    {subscription.billingInterval}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Upcoming Renewals */}
-      <div className="mb-10">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-[#FFFFFF]">
-              Upcoming Renewals
-            </h2>
-            <p className="text-sm text-[#B3B3B3]">Next 1–20 days</p>
-          </div>
-          <span className="text-xs text-[#B3B3B3]">
-            {upcomingRenewals.length} upcoming
-          </span>
-        </div>
-
-        {upcomingRenewals.length === 0 ? (
-          <div className="bg-[#191919] border border-[#2A2A2A]/50 rounded-xl p-6 text-sm text-[#B3B3B3]">
-            No renewals in the next 20 days.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {upcomingRenewals.map((subscription) => {
-              const isUrgent = subscription.daysUntil <= 10;
-
-              return (
-                <div
-                  key={subscription._id}
-                  className={`rounded-xl border p-5 bg-[#191919] ${
-                    isUrgent
-                      ? 'border-[#F97316]/60 shadow-[0_0_0_1px_rgba(249,115,22,0.25)]'
-                      : 'border-[#2A2A2A]/50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-base font-semibold text-[#FFFFFF]">
-                        {subscription.serviceName}
-                      </p>
-                      <p className="text-xs text-[#B3B3B3]">
-                        {subscription.serviceCategory}
-                      </p>
-                    </div>
-                    <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full ${
-                        isUrgent
-                          ? 'bg-[#F97316]/15 text-[#FDBA74]'
-                          : 'bg-[#2563EB]/10 text-[#93C5FD]'
-                      }`}
-                    >
-                      Renews in {subscription.daysUntil} days
-                    </span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between text-sm">
-                    <span className="text-[#B3B3B3]">
-                      {formatDate(subscription.upcomingRenewal)}
-                    </span>
-                    <span className="text-[#FFFFFF] font-medium">
-                      {formatCurrency(subscription.cost)} /
-                      {' ' + subscription.billingInterval}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Modal */}

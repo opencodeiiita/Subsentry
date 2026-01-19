@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Plus, Loader2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import DashboardLayout from '../components/DashboardLayout';
 import {
   SubscriptionCard,
@@ -18,9 +19,9 @@ import {
   FilterCategory,
   SortField,
   SortOrder,
-  UpdateSubscriptionModal,
-  RemoveSubscriptionDialog,
 } from '../components/subscriptions';
+import UpdateSubscriptionModal from '../components/subscriptions/UpdateSubscriptionModal';
+import RemoveSubscriptionDialog from '../components/subscriptions/RemoveSubscriptionDialog';
 import { Subscription, getSubscriptions, updateSubscription, deleteSubscription } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -60,9 +61,12 @@ export default function SubscriptionsPage() {
           return;
         }
         const data = await getSubscriptions(token);
-        setSubscriptions(data.data || []);
+        setSubscriptions(data.subscriptions || []);
       } catch (err) {
         setError('Failed to load subscriptions. Make sure the server is running.');
+        toast.error('Failed to load subscriptions', {
+          description: 'Make sure the server is running.',
+        });
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -85,13 +89,13 @@ export default function SubscriptionsPage() {
 
     // Apply filters
     if (statusFilter !== 'all') {
-      result = result.filter(s => s.status === statusFilter);
+      result = result.filter((s) => s.status === statusFilter);
     }
     if (billingCycleFilter !== 'all') {
-      result = result.filter(s => s.billingCycle === billingCycleFilter);
+      result = result.filter((s) => s.billingCycle === billingCycleFilter);
     }
     if (categoryFilter !== 'all') {
-      result = result.filter(s => s.category === categoryFilter);
+      result = result.filter((s) => s.category === categoryFilter);
     }
 
     // Apply sorting
@@ -106,9 +110,6 @@ export default function SubscriptionsPage() {
           break;
         case 'name':
           comparison = a.name.localeCompare(b.name);
-          break;
-        case 'createdAt':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           break;
       }
       return sortOrder === 'asc' ? comparison : -comparison;
@@ -133,154 +134,193 @@ export default function SubscriptionsPage() {
         return;
       }
       const data = await getSubscriptions(token);
-      setSubscriptions(data.data || []);
+      setSubscriptions(data.subscriptions || []);
+      toast.success('Refreshed successfully');
     } catch (err) {
       setError('Failed to refresh subscriptions');
+      toast.error('Failed to refresh', {
+        description: 'Could not refresh subscriptions.',
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEditSubscription = async (id: string, data: Partial<Subscription>) => {
-    const token = await getToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const result = await updateSubscription(token, id, data);
-    setSubscriptions((prev) =>
-      prev.map((sub) => (sub._id === id ? result.subscription : sub))
-    );
+  // FIXED: Handler to change sort field
+  const handleSortChange = (field: SortField) => {
+    setSortField(field);
   };
 
-  const handleDeleteSubscription = async (id: string) => {
-    const token = await getToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
+  // FIXED: Handler to toggle sort order
+  const handleOrderToggle = () => {
+    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
 
-    await deleteSubscription(token, id);
-    setSubscriptions((prev) => prev.filter((sub) => sub._id !== id));
+  // Handle edit subscription - ADAPTED for UpdateSubscriptionModal
+  const handleEditSubscription = async (id: string, data: Partial<Subscription>) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      console.log('Editing subscription:', id, data); // Debug log
+      const result = await updateSubscription(token, id, data);
+
+      // Update local state - USE _id NOT id
+      setSubscriptions((prev) =>
+        prev.map((sub) => (sub._id === id ? result.subscription : sub))
+      );
+
+      toast.success('Subscription updated', {
+        description: `${result.subscription.name} has been updated successfully.`,
+      });
+    } catch (error) {
+      console.error('Update error:', error);
+      throw error; // Re-throw so modal can handle it
+    }
+  };
+
+  // Handle delete subscription - FIX THE ID FIELD
+  const handleDeleteSubscription = async (id: string) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      // Get subscription name before deleting
+      const subscription = subscriptions.find((s) => s._id === id);
+      const subName = subscription?.name || 'Subscription';
+
+      await deleteSubscription(token, id);
+
+      // Remove from local state - USE _id NOT id
+      setSubscriptions((prev) => prev.filter((sub) => sub._id !== id));
+
+      toast.success('Subscription deleted', {
+        description: `${subName} has been permanently removed.`,
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+      throw error;
+    }
   };
 
   return (
-    <DashboardLayout title="Subscriptions" subtitle="Manage all your recurring payments">
-      {/* Quick Stats */}
-      {!isLoading && subscriptions.length > 0 && (
-        <div className="mb-6">
+    <DashboardLayout 
+      title="My Subscriptions"
+      subtitle={`${subscriptions.length} ${subscriptions.length === 1 ? 'subscription' : 'subscriptions'} tracked`}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
+            </Button>
+            <Link href="/subscriptions/add">
+              <ShimmerButton>
+                <Plus className="w-4 h-4 mr-2" />
+                Add New
+              </ShimmerButton>
+            </Link>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        {!isLoading && subscriptions.length > 0 && (
           <QuickStats subscriptions={subscriptions} />
-        </div>
-      )}
+        )}
 
-      {/* Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-        <FilterBar
-          statusFilter={statusFilter}
-          billingCycleFilter={billingCycleFilter}
-          categoryFilter={categoryFilter}
-          onStatusChange={setStatusFilter}
-          onBillingCycleChange={setBillingCycleFilter}
-          onCategoryChange={setCategoryFilter}
-          onClearFilters={clearFilters}
-          activeFiltersCount={activeFiltersCount}
-        />
-
-        <div className="flex items-center gap-3">
-          <SortDropdown
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSortChange={setSortField}
-            onOrderToggle={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+        {/* Toolbar */}
+        <div className="flex items-center justify-between">
+          <FilterBar
+            statusFilter={statusFilter}
+            billingCycleFilter={billingCycleFilter}
+            categoryFilter={categoryFilter}
+            onStatusChange={setStatusFilter}
+            onBillingCycleChange={setBillingCycleFilter}
+            onCategoryChange={setCategoryFilter}
+            activeFiltersCount={activeFiltersCount}
+            onClearFilters={clearFilters}
           />
-
-          <ViewToggle view={view} onViewChange={setView} />
-
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={isLoading}
-            title="Refresh"
-          >
-            <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
-          </Button>
-
-          <Link href="/subscriptions/new">
-            <ShimmerButton className="flex items-center gap-2 px-4 py-2.5">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add New</span>
-            </ShimmerButton>
-          </Link>
+          <div className="flex gap-2">
+            {/* FIXED: Added both onSortChange AND onOrderToggle */}
+            <SortDropdown
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              onOrderToggle={handleOrderToggle}
+            />
+            <ViewToggle view={view} onViewChange={setView} />
+          </div>
         </div>
+
+        {/* Content */}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+            <p className="ml-3 text-gray-400">Loading your subscriptions...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={handleRefresh} variant="outline">
+              Try Again
+            </Button>
+          </div>
+        ) : filteredAndSortedSubscriptions.length === 0 ? (
+          subscriptions.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">No subscriptions match your filters</p>
+              <Button onClick={clearFilters} variant="outline">
+                Clear Filters
+              </Button>
+            </div>
+          )
+        ) : (
+          <>
+            {/* Results count */}
+            <p className="text-sm text-gray-400">
+              Showing {filteredAndSortedSubscriptions.length} of {subscriptions.length} subscriptions
+            </p>
+
+            {/* Subscription Grid/List */}
+            <motion.div
+              layout
+              className={cn(
+                view === 'grid'
+                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+                  : 'flex flex-col gap-4'
+              )}
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredAndSortedSubscriptions.map((subscription, index) => (
+                  <SubscriptionCard
+                    key={subscription._id}
+                    subscription={subscription}
+                    view={view}
+                    index={index}
+                    onEdit={() => setEditingSubscription(subscription)}
+                    onDelete={() => setDeletingSubscription(subscription)}
+                  />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </>
+        )}
       </div>
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-            <p className="text-gray-400">Loading your subscriptions...</p>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <p className="text-red-400 mb-4">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="px-4 py-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-[#2a2a2a] transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      ) : filteredAndSortedSubscriptions.length === 0 ? (
-        subscriptions.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16">
-            <p className="text-gray-400 mb-4">No subscriptions match your filters</p>
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-[#2a2a2a] transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        )
-      ) : (
-        <>
-          {/* Results count */}
-          <div className="mb-4 text-sm text-gray-500">
-            Showing {filteredAndSortedSubscriptions.length} of {subscriptions.length} subscriptions
-          </div>
-
-          {/* Subscription Grid/List */}
-          <motion.div 
-            layout
-            className={cn(
-              view === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
-                : 'flex flex-col gap-3'
-            )}
-          >
-            <AnimatePresence mode="popLayout">
-              {filteredAndSortedSubscriptions.map((subscription, index) => (
-                <SubscriptionCard
-                  key={subscription._id}
-                  subscription={subscription}
-                  view={view}
-                  index={index}
-                  onEdit={() => setEditingSubscription(subscription)}
-                  onDelete={() => setDeletingSubscription(subscription)}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        </>
-      )}
-
+      {/* Edit Modal - Using RENAMED UpdateSubscriptionModal */}
       <UpdateSubscriptionModal
         subscriptionData={editingSubscription}
         visible={!!editingSubscription}
@@ -288,6 +328,7 @@ export default function SubscriptionsPage() {
         onUpdate={handleEditSubscription}
       />
 
+      {/* Delete Dialog - Using RENAMED RemoveSubscriptionDialog */}
       <RemoveSubscriptionDialog
         subscriptionData={deletingSubscription}
         open={!!deletingSubscription}
