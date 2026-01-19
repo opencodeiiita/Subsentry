@@ -1,6 +1,5 @@
 import { Subscription } from '../models/Subscription.js';
 import { validateCreateSubscription } from '../validators/subscription.validator.js';
-import { calculateMonthlySpend, calculateYearlySpend } from '../services/subscriptionMetrics.js';
 
 export const createSubscription = async (req, res) => {
   try {
@@ -46,16 +45,7 @@ export const getUserSubscriptions = async (req, res) => {
       .sort({ renewalDate: 1 })
       .select('-__v');
 
-    const monthlySpend = calculateMonthlySpend(subscriptions);
-    const yearlySpend = calculateYearlySpend(subscriptions);
-
-    return res.status(200).json({
-      data: subscriptions,
-      meta: {
-        monthlySpend,
-        yearlySpend,
-      },
-    });
+    return res.status(200).json({ subscriptions });
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to fetch subscriptions',
@@ -73,26 +63,20 @@ export const updateSubscription = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    // Find the subscription and verify ownership
     const subscription = await Subscription.findOne({ _id: id, userId });
+
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
 
+    // Update fields
     const allowedUpdates = [
-      'name',
-      'amount',
-      'currency',
-      'billingCycle',
-      'category',
-      'renewalDate',
-      'isTrial',
-      'trialEndsAt',
-      'source',
-      'status',
-      'notes',
+      'name', 'amount', 'currency', 'billingCycle', 'category',
+      'renewalDate', 'isTrial', 'trialEndsAt', 'source', 'status'
     ];
 
-    allowedUpdates.forEach((field) => {
+    allowedUpdates.forEach(field => {
       if (req.body[field] !== undefined) {
         subscription[field] = req.body[field];
       }
@@ -121,7 +105,9 @@ export const deleteSubscription = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    // Find and delete the subscription, verifying ownership
     const subscription = await Subscription.findOneAndDelete({ _id: id, userId });
+
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }

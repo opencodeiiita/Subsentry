@@ -102,10 +102,6 @@ const SubscriptionDashboard = () => {
     return sum + (sub.billingCycle === "monthly" ? sub.amount : sub.amount / 12);
   }, 0);
 
-  const yearlySpending = subscriptions.reduce((sum, sub) =>{
-    return sum + (sub.billingCycle === "yearly" ? sub.amount : sub.amount * 12);
-  }, 0);
-
   // 🔹 CARD COMPONENT
   const SubscriptionCard = ({ subscription }: any) => {
     const daysUntil = getDaysUntilRenewal(subscription.renewalDate);
@@ -211,12 +207,6 @@ const SubscriptionDashboard = () => {
           <p>Monthly Spending</p>
           <h2 className="text-3xl font-bold">
             ₹{monthlySpending.toFixed(2)}
-          </h2>
-        </div>
-        <div className="bg-green-600 rounded-xl p-6 text-white">
-          <p>Yearly Spending</p>
-          <h2 className="text-3xl font-bold">
-            ₹{yearlySpending.toFixed(2)}
           </h2>
         </div>
         <div className="bg-red-600 rounded-xl p-6 text-white">

@@ -18,8 +18,7 @@ export interface Subscription {
 }
 
 export interface SubscriptionResponse {
-  data: Subscription[];
-  meta?: any;
+  subscriptions: Subscription[];
 }
 
 export async function getSubscriptions(token: string): Promise<SubscriptionResponse> {
@@ -73,8 +72,6 @@ export async function updateSubscription(
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    console.error('Update subscription error:', error);
     throw new Error('Failed to update subscription');
   }
 
@@ -94,8 +91,6 @@ export async function deleteSubscription(
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    console.error('Delete subscription error:', error);
     throw new Error('Failed to delete subscription');
   }
 
